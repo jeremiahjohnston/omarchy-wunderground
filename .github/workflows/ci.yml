@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: shellcheck scripts/* tests/*.sh
       - run: jq -e '.id == "io.github.jeremiahjohnston.wunderground" and (.kinds | index("bar-widget"))' manifest.json
-      - run: for t in tests/wu-*.sh; do "$t"; done
+      - run: for t in tests/wu-*.sh tests/qml-*.sh; do "$t"; done
 
   # Committed keys and tokens, in every commit (GitHub's own secret scanning
   # is a paid add-on for private repos).

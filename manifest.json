@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.jeremiahjohnston.wunderground",
   "name": "Wunderground Station",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "Jeremiah Johnston",
   "license": "MIT",
   "description": "Current temperature from a Weather Underground personal weather station, with conditions and a 5-day forecast.",

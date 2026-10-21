@@ -215,6 +215,7 @@ Panel {
             spacing: Style.space(2)
 
             Text {
+              textFormat: Text.PlainText
               width: parent.width
               elide: Text.ElideRight
               text: root.obs.neighborhood || root.obs.station || root.stationId
@@ -225,6 +226,7 @@ Panel {
             }
 
             Text {
+              textFormat: Text.PlainText
               width: parent.width
               elide: Text.ElideRight
               // The title already shows the station ID when there is no
@@ -244,6 +246,7 @@ Panel {
             spacing: Style.space(6)
 
             Text {
+              textFormat: Text.PlainText
               anchors.verticalCenter: parent.verticalCenter
               text: root.obs.ok ? root.num(root.obs.temp) + root.deg : "–"
               color: root.barForeground
@@ -264,6 +267,7 @@ Panel {
         }
 
         Text {
+          textFormat: Text.PlainText
           visible: !root.obs.ok && !!root.obs.error
           width: parent.width
           wrapMode: Text.Wrap
@@ -291,6 +295,7 @@ Panel {
               spacing: Style.space(1)
 
               Text {
+                textFormat: Text.PlainText
                 text: modelData.label.toUpperCase()
                 color: root.dimColor
                 font.family: root.fontFamily
@@ -298,6 +303,7 @@ Panel {
               }
 
               Text {
+                textFormat: Text.PlainText
                 text: modelData.value
                 color: root.barForeground
                 font.family: root.fontFamily
@@ -333,6 +339,7 @@ Panel {
               height: Style.space(18)
 
               Text {
+                textFormat: Text.PlainText
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 text: modelData.label
@@ -342,6 +349,7 @@ Panel {
               }
 
               Text {
+                textFormat: Text.PlainText
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 text: modelData.value
@@ -362,6 +370,7 @@ Panel {
         }
 
         Text {
+          textFormat: Text.PlainText
           visible: root.showForecast
           text: "FORECAST"
           color: root.accentColor
@@ -371,6 +380,7 @@ Panel {
         }
 
         Text {
+          textFormat: Text.PlainText
           visible: root.showForecast && !root.details.ok
           width: parent.width
           wrapMode: Text.Wrap
@@ -385,6 +395,7 @@ Panel {
 
         // First entry is today or tonight; show its narrative in full.
         Text {
+          textFormat: Text.PlainText
           visible: root.showForecast && !!root.details.ok && root.details.days.length > 0
           width: parent.width
           wrapMode: Text.Wrap
@@ -410,6 +421,7 @@ Panel {
               height: Style.space(20)
 
               Text {
+                textFormat: Text.PlainText
                 id: dayName
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
@@ -422,6 +434,7 @@ Panel {
               }
 
               Text {
+                textFormat: Text.PlainText
                 anchors.left: dayName.right
                 anchors.right: rain.left
                 anchors.rightMargin: Style.space(8)
@@ -434,6 +447,7 @@ Panel {
               }
 
               Text {
+                textFormat: Text.PlainText
                 id: rain
                 anchors.right: temps.left
                 anchors.rightMargin: Style.space(12)
@@ -447,6 +461,7 @@ Panel {
               }
 
               Text {
+                textFormat: Text.PlainText
                 id: temps
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
@@ -462,6 +477,7 @@ Panel {
         }
 
         Text {
+          textFormat: Text.PlainText
           width: parent.width
           horizontalAlignment: Text.AlignHCenter
           text: "R refresh · O open dashboard · S settings"
@@ -483,6 +499,7 @@ Panel {
           height: Math.max(settingsTitle.implicitHeight, backButton.height)
 
           Text {
+            textFormat: Text.PlainText
             id: settingsTitle
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
@@ -527,6 +544,8 @@ Panel {
           wrapMode: Text.Wrap
           text: "Find a station on the Wundermap, or use your own. The ID is the last part of its "
             + "dashboard address: wunderground.com/dashboard/pws/<b>KCASANFR123</b>"
+          // Static markup for the bold example ID. Only literal text belongs
+          // here: never put station or API strings in a StyledText element.
           textFormat: Text.StyledText
           color: root.dimColor
           font.family: root.fontFamily
@@ -550,6 +569,7 @@ Panel {
         }
 
         Text {
+          textFormat: Text.PlainText
           width: parent.width
           wrapMode: Text.Wrap
           text: "Weather Underground gives free API keys to station owners. Sign in at "
@@ -587,6 +607,7 @@ Panel {
         }
 
         Text {
+          textFormat: Text.PlainText
           width: parent.width
           wrapMode: Text.Wrap
           text: root.setupStatus()
@@ -631,6 +652,7 @@ Panel {
             height: Math.max(optionLabel.implicitHeight, optionGroup.implicitHeight)
 
             Text {
+              textFormat: Text.PlainText
               id: optionLabel
               anchors.left: parent.left
               anchors.verticalCenter: parent.verticalCenter
@@ -665,6 +687,7 @@ Panel {
           height: refreshField.implicitHeight
 
           Text {
+            textFormat: Text.PlainText
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             text: "Refresh every (minutes)"
