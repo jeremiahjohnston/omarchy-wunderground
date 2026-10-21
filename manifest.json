@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.jeremiahjohnston.wunderground",
+  "name": "Wunderground Station",
+  "version": "1.1.0",
+  "author": "Jeremiah Johnston",
+  "license": "MIT",
+  "description": "Current temperature from a Weather Underground personal weather station, with conditions and a 5-day forecast.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Wunderground Station",
+    "description": "Outside temperature from a Weather Underground PWS, with a details and forecast panel.",
+    "category": "Info",
+    "allowMultiple": true,
+    "defaultSection": "center",
+    "defaults": {
+      "stationId": "",
+      "units": "auto",
+      "barValue": "temp",
+      "decimals": 0,
+      "showUnit": false,
+      "showForecast": true,
+      "bold": true,
+      "accent": false,
+      "refreshSeconds": 300
+    },
+    "schema": [
+      { "key": "stationId", "type": "string", "label": "Station ID", "description": "Weather Underground PWS ID, e.g. KCASANFR123" },
+      { "key": "units", "type": "enum", "label": "Units", "options": ["auto", "e", "m", "h"], "description": "auto follows your locale; e is °F/mph, m is °C/km/h, h is °C/mph" },
+      { "key": "barValue", "type": "enum", "label": "Bar shows", "options": ["temp", "feels"] },
+      { "key": "decimals", "type": "enum", "label": "Decimal places", "options": [0, 1] },
+      { "key": "showUnit", "type": "bool", "label": "Show °F/°C in the bar" },
+      { "key": "showForecast", "type": "bool", "label": "Show the forecast in the panel" },
+      { "key": "bold", "type": "bool", "label": "Bold reading in the bar" },
+      { "key": "accent", "type": "bool", "label": "Draw the reading in the theme's accent color" },
+      { "key": "refreshSeconds", "type": "int", "label": "Refresh interval (seconds)", "min": 60, "max": 3600 }
+    ]
+  }
+}

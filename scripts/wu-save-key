@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Saves the Weather Underground API key from $WU_NEW_KEY to the key file,
+# readable only by you. The key comes through the environment rather than
+# argv so it never shows up in the process list. An empty key deletes the file.
+
+key_file="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/wunderground.key"
+key=$(tr -d '[:space:]' <<<"${WU_NEW_KEY:-}")
+
+if [[ -z $key ]]; then
+  rm -f "$key_file"
+  exit 0
+fi
+
+mkdir -p "$(dirname "$key_file")"
+(umask 077 && printf '%s\n' "$key" >"$key_file.tmp") && mv "$key_file.tmp" "$key_file"

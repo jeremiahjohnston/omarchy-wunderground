@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Prints the current observation for a Weather Underground PWS as one JSON line.
+# Usage: wu-current <stationId> <e|m|h>
+# The API key is read from ~/.config/omarchy/wunderground.key (or $WU_API_KEY).
+
+# shellcheck source=scripts/lib.sh
+source "$(dirname "$0")/lib.sh"
+
+station=$(station_id "$1")
+units="${2:-e}"
+
+[[ -n $station ]] || fail no-station "No station ID set"
+load_key
+
+block=$(units_block "$units")
+
+# Picks the feels-like value: heat index when hot, wind chill when cold.
+# The $ names are jq variables, not shell ones.
+# shellcheck disable=SC2016
+feels='def feels($t; $hi; $wc): if $t >= (if $u == "e" then 80 else 27 end) then $hi
+  elif $t <= (if $u == "e" then 50 else 10 end) then $wc else $t end;'
+
+request "v2/pws/observations/current?stationId=${station}&format=json&units=${units}&numericPrecision=decimal"
+
+# 204 means no current report: either an unknown station or one that has
+# gone quiet. A station that reported earlier today gets its last reading,
+# marked stale, so an outage doesn't look like a setup problem.
+if [[ $status == 204 ]]; then
+  request "v2/pws/observations/all/1day?stationId=${station}&format=json&units=${units}&numericPrecision=decimal"
+  [[ $status == 200 && -n $body ]] || status=204
+  check_status no-station "Station $station not found or not reporting today; check the station ID"
+  jq -ce --arg b "$block" --arg u "$units" "$feels"'.observations[-1] as $o | $o[$b] as $m | {
+    ok: true,
+    stale: true,
+    station: $o.stationID,
+    neighborhood: null,
+    obsTime: $o.obsTimeLocal,
+    units: $u,
+    temp: $m.tempAvg,
+    feels: feels($m.tempAvg; $m.heatindexAvg; $m.windchillAvg),
+    dewpt: $m.dewptAvg,
+    humidity: $o.humidityAvg,
+    windSpeed: $m.windspeedAvg,
+    windGust: $m.windgustHigh,
+    winddir: $o.winddirAvg,
+    pressure: $m.pressureMax,
+    precipRate: $m.precipRate,
+    precipTotal: $m.precipTotal,
+    uv: $o.uvHigh,
+    solarRadiation: $o.solarRadiationHigh,
+    lat: $o.lat,
+    lon: $o.lon
+  }' <<<"$body" 2>/dev/null || fail http "Unexpected response for station $station"
+  exit 0
+fi
+
+check_status
+
+jq -c --arg b "$block" --arg u "$units" "$feels"'.observations[0] as $o | $o[$b] as $m | {
+  ok: true,
+  stale: false,
+  station: $o.stationID,
+  neighborhood: $o.neighborhood,
+  obsTime: $o.obsTimeLocal,
+  units: $u,
+  temp: $m.temp,
+  feels: feels($m.temp; $m.heatIndex; $m.windChill),
+  dewpt: $m.dewpt,
+  humidity: $o.humidity,
+  windSpeed: $m.windSpeed,
+  windGust: $m.windGust,
+  winddir: $o.winddir,
+  pressure: $m.pressure,
+  precipRate: $m.precipRate,
+  precipTotal: $m.precipTotal,
+  uv: $o.uv,
+  solarRadiation: $o.solarRadiation,
+  lat: $o.lat,
+  lon: $o.lon
+}' <<<"$body" 2>/dev/null || fail http "Unexpected response for station $station"

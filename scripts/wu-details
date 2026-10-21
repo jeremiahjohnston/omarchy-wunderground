@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Prints today's station summary and the 5-day forecast for a Weather
+# Underground PWS as one JSON line.
+# Usage: wu-details <stationId> <e|m|h> <lat> <lon>
+# The API key is read from ~/.config/omarchy/wunderground.key (or $WU_API_KEY).
+
+# shellcheck source=scripts/lib.sh
+source "$(dirname "$0")/lib.sh"
+
+station=$(station_id "$1")
+units="${2:-e}"
+lat="$3"
+lon="$4"
+
+[[ -n $lat && -n $lon ]] || fail no-data "Station location unknown"
+load_key
+
+# The summary is optional: without it the panel just omits today's high/low.
+request "v2/pws/dailysummary/7day?stationId=${station}&format=json&units=${units}&numericPrecision=decimal"
+summary='{}'
+[[ $status == 200 && -n $body ]] && summary=$body
+
+request "v3/wx/forecast/daily/5day?geocode=${lat},${lon}&format=json&units=${units}&language=en-US"
+check_status no-data "No forecast for this location"
+forecast=$body
+
+jq -cn --arg b "$(units_block "$units")" --argjson s "$summary" --argjson f "$forecast" '
+  ($s.summaries // [] | last // {}) as $today
+  | ($f.daypart[0] // {}) as $dp
+  | def part($i; $key): ($dp[$key] // [])[$i];
+    def clock: if . then (.[11:16] | split(":") | "\((.[0] | tonumber) as $h | if $h % 12 == 0 then 12 else $h % 12 end):\(.[1]) \(if (.[0] | tonumber) < 12 then "AM" else "PM" end)") else null end;
+  {
+    ok: true,
+    today: {
+      high: $today[$b].tempHigh,
+      low: $today[$b].tempLow,
+      precipTotal: $today[$b].precipTotal,
+      gustHigh: $today[$b].windgustHigh,
+      pressureTrend: $today[$b].pressureTrend
+    },
+    sunrise: ($f.sunriseTimeLocal[0] | clock),
+    sunset: ($f.sunsetTimeLocal[0] | clock),
+    days: [range(0; ($f.dayOfWeek | length)) as $i
+      # Each day has a day part (2i) and a night part (2i+1); the day part is
+      # null once the day is over, so fall back to tonight.
+      | (if part(2 * $i; "daypartName") then 2 * $i else 2 * $i + 1 end) as $p
+      | {
+          name: (if $i == 0 then (part($p; "daypartName") // "Today") else $f.dayOfWeek[$i][0:3] end),
+          high: $f.temperatureMax[$i],
+          low: $f.temperatureMin[$i],
+          phrase: part($p; "wxPhraseLong"),
+          precipChance: part($p; "precipChance"),
+          narrative: part($p; "narrative")
+        }]
+  }' 2>/dev/null || fail http "Unexpected forecast response"
